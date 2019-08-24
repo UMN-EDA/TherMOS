@@ -1,4 +1,4 @@
-data = csvread('../work/device_parameters.csv');
+ = csvread('../work/device_parameters.csv');
 
 resx = data(1,1);%100.000 130.000 68.000
 resy = data(1,2);
