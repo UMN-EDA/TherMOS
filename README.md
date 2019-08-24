@@ -1,6 +1,8 @@
 # Thermal model for planar bulk, SOI and NCFET devices
 Thermal model to estimate rise in temperature due to self-heating in planar SOI/bulk/NC FET devices. The temperature is estimated using thermal-electrical equivalence where finding temperature at every node within the device amounts to calculating the voltage at each node in its corresponding electrical equivalent network. The software can estimate the temperature of one or more devices as long as they share the same continous diffusion. Please refer *./doc/UserGuide.md* for further details.
 
+![Planar SOI device](./doc/PlanarSOI.pdf) ![Thermal profile](./doc/temperature_profile.png)
+
 ## Getting Started
 
 ### Prerequisute
@@ -29,12 +31,12 @@ To run the software:
 
 `python3 self_heating.py -tech SOI -n_gate 2 -width 120 -type NMOS -power 2.4e-6 -active {0,1}`
 
- *tech*: this variable specifies the technology of the planar transistor. Options include: SOI, Bulk, or  NC
- *n_gate*: number of devices/gate terminals to simulate that share a continous diffusion
- *width*: width of the transistors in nm
- *type*: NMOS/PMOS transistor
- *power*: total power dissipated by all gates
- *active*: the gates that are dissipating power
+- *tech*: this variable specifies the technology of the planar transistor. Options include: SOI, Bulk, or  NC
+- *n_gate*: number of devices/gate terminals to simulate that share a continous diffusion
+- *width*: width of the transistors in nm
+- *type*: NMOS/PMOS transistor
+- *power*: total power dissipated by all gates
+- *active*: the gates that are dissipating power
 
  After the program sucessfully executes, if you have MATLAB installed, to view the temperature profile:
 
