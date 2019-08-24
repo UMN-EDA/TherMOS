@@ -1,7 +1,7 @@
 # Thermal model for planar bulk, SOI and NCFET devices
 Thermal model to estimate rise in temperature due to self-heating in planar SOI/bulk/NC FET devices. The temperature is estimated using thermal-electrical equivalence where finding temperature at every node within the device amounts to calculating the voltage at each node in its corresponding electrical equivalent network. The software can estimate the temperature of one or more devices as long as they share the same continous diffusion. Please refer *./doc/UserGuide.md* for further details.
 
-![Planar SOI device](./doc/PlanarSOI.pdf) ![Thermal profile](./doc/temperature_profile.png)
+![Planar SOI device](./doc/PlanarSOI.png) ![Thermal profile](./doc/temperature_profile.png)
 
 ## Getting Started
 
