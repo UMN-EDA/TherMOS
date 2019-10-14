@@ -43,7 +43,7 @@ parser.add_argument("-width", type=float,
 parser.add_argument("-type",  choices= ['NMOS','PMOS'],
                     help="Provide trasistor type", required = True)
 parser.add_argument("-power", type=float, 
-                    help="Provide the total power dissipated")
+                    help="Provide the total power dissipated", required = True)
 parser.add_argument("-active", "--active", 
                     help="Provide list of active gates in quotes seperated by comma delimiter", required = True)
 args = parser.parse_args()
@@ -55,7 +55,9 @@ power = args.power
 a_gates = [int(item)for item in args.active.split(',')]
 print(a_gates)
 
+#TODO its BULK not Bulk
 TECH = args.tech #'BULK' #SOI BULK 
+
 MOS = args.type  # NMOS or PMOS
 
 # properties
@@ -97,7 +99,7 @@ t_box   = quant(t_box,resz)
 t_chnl  = quant(t_chnl,resz)
 t_gox   = quant(t_gox,resz)
 sp_edge = quant(sp_edge,resx) #TODO x and y 
-t_sp_edge = quant(sp_edge,resz)
+t_sp_edge = quant(t_sp_edge,resz)
 e_gate  = quant(e_gate,resy) 
 l_diff  = quant(l_diff,resx)
 t_substrate = quant(t_substrate,resz)

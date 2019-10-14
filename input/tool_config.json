@@ -1,7 +1,7 @@
 {
-    "resolution": [5,5,1],
+    "resolution": [2.5,2.5,2.5],
     "t_sub2gnd": 475,
-    "t_cnt2gnd":1000,
+    "t_cnt2gnd":10000,
     "sp_edge": 5,
     "t_sp_edge": 20,
     "l_sp_diff_ext": 5

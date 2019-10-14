@@ -8,7 +8,7 @@ l = data(2,1)/resx;%15;96 108 28
 w = data(2,2)/resy;% 9;
 h = data(2,3)/resz;%10;
 
-T = csvread('../work/T.out');
+T = csvread('../work/C.out');
 T_n = zeros(l,w,h);
 i = 1;
 
@@ -37,7 +37,7 @@ colormap(jet(256));
 %codediagram=slice(x_new, y_new, z_new, T,[1 2 ], [1 2 ], 0:k_ran);
 %diagram=slice(x_new, y_new, z_new, T,[  i_ran/2-1,   i_ran/2+1,   i_ran/2+ 3 ], [  j_ran/2 ], [55, 0.56*  k_ran-20:4:0.56*  k_ran+5,110]);%k_ran);
 %diagram=slice(x_new, y_new, z_new, T,[(  j_ran)/2], [(  i_ran)/3 ], [  face]);%k_ran);
-diagram=slice(x_new, y_new, z_new, T_n(:,:,:),[w/3, w/2, 2*w/3], [l/2], [h/5,2*h/5,3*h/5,4*h/5,4*h/5]);%k_ran);
+diagram=slice(x_new, y_new, z_new, T_n(:,:,:),[w/3-1, w/2, 2*w/3+2], [l/3,l/2,2*l/3], [3*h/5-1.5]);%k_ran);
 
 xlabel('width')
 ylabel('length')
