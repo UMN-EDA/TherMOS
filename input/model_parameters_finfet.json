@@ -6,7 +6,7 @@
         "t_gate": 40,
         "t_chnl": 32,
         "t_gox": 2,
-        "t_cnt": 10,
+        "t_cont": 10,
         "t_diff_ext": 20,
         "l_diff": 35,
         "l_diff_ext": 25 ,

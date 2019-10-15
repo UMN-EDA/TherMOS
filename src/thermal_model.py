@@ -47,7 +47,6 @@ class thermal_model():
 
         self.parameters =True;
 
-   #TODO modify to read from file, get the file as input
     def set_conductivity_table(self,model_file):
         self.cond = {}
         with open(model_file) as f:
@@ -63,8 +62,6 @@ class thermal_model():
         self.cond['SiO2'] = cond_data['thermal_conductivity']['SiO2'] #0.8e-9
         self.cond['spacer'] = cond_data['thermal_conductivity']['spacer'] #30e-9
         self.cond['contact'] = cond_data['thermal_conductivity']['contact'] #385e-9 # conductivity of copper
-#        for idx in self.cond:
-#            self.cond[idx] = self.cond[idx] *self.resolution
         self.cond_table =True;
 
     def quantize_values(self,val):
@@ -94,9 +91,8 @@ class thermal_model():
             "Size z coordinate out of bounds sz_z %d or_z %d"%(sz_z,or_z))
         
         assert np.count_nonzero(self.C[or_x:(or_x + sz_x),or_y:(or_y +
-        sz_y),or_z:(or_z + sz_z)]) == 0," Overlap with existing box, please check your dimensions and refer doc/UserGuide.md"
-
-        
+            sz_y),or_z:(or_z + sz_z)]) == 0," Overlap with existing box,"+\
+            " please check your dimensions and refer doc/UserGuide.md"
         self.C[or_x:(or_x + sz_x),or_y:(or_y + sz_y),or_z:(or_z + sz_z)] = cond
     
     def create_gate(self, origin, gate_width):
@@ -110,11 +106,11 @@ class thermal_model():
         size = (sz_x,sz_y,sz_z)
         self.create_box(origin, size, cond)
         
-    #TODO allow for separate conductivities for nplanar, fin, gaafet 
-    def create_diffusion(self, origin, size, d_type='PMOS',finfet=0):
+    #TODO allow for separate conductivities for gaafet 
+    def create_diffusion(self, origin, size, d_type='PMOS',finFET=0):
         assert self.cond_table, "Set the conductivity table before designing the layout"
         assert d_type == 'PMOS' or d_type == 'NMOS', "Diffusion type not recognized"
-        if finfet == 1:
+        if finFET == 1:
             if d_type == 'PMOS':
                 cond = self.cond['Si PMOS fin']
             else:

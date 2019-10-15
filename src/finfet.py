@@ -19,12 +19,11 @@ from thermal_model import thermal_model
 #width  is along y Dimension 1
 #height is along z Dimension 2
 
-#TODO right now resx and resy have to be the same
 
 f_model_param = './input/model_parameters_finfet.json'
 f_tool_config = './input/tool_config.json'
 
-class finfet:
+class finFET:
     def __init__(self,TECH, MOS, n_gate, n_fin):
         self.TECH = TECH
         self.MOS = MOS
@@ -53,11 +52,11 @@ class finfet:
         t_chnl = model_param["dimensions"]["t_chnl"] #6   # thickness of channel, source and drain diffusions
         t_gox  = model_param["dimensions"]["t_gox"] #1   # thickness of gate oxide
         t_diff_ext = model_param["dimensions"]["t_diff_ext"] #20 # height of the diffusion extension above the diffusion
-        t_cnt = model_param["dimensions"]["t_cnt"] #10 thickness of contact bar
+        t_cont = model_param["dimensions"]["t_cont"] #10 thickness of contact bar
                                                    # across all fins
         
         e_gate  = model_param["dimensions"]["e_gate"] #10  # extension of gate out of diffusion
-        l_diff  =  model_param["dimensions"]["l_diff"] #35 # lenght of source and drain diffusion
+        l_gate_space  =  model_param["dimensions"]["l_gate_space"] #35 # lenght of source and drain diffusion
         l_diff_ext = model_param["dimensions"]["l_diff_ext"] #25 # length of the source and drain diffusion extension
         
         l_cont = model_param["dimensions"]["l_cont"] #10 #length of contact
@@ -91,11 +90,14 @@ class finfet:
         self.t_box   = self.quant(t_box,resz)
         self.t_chnl  = self.quant(t_chnl,resz)
         self.t_gox   = self.quant(t_gox,resz)
-        self.t_cnt   = self.quant(t_cnt,resz) 
-        self.sp_edge = self.quant(sp_edge,resx) #TODO x and y 
+        self.l_gox   = self.quant(t_gox,resx)
+        self.w_gox   = self.quant(t_gox,resy)
+        self.t_cont  = self.quant(t_cont,resz) 
+        self.l_sp_edge = self.quant(sp_edge,resx) 
+        self.w_sp_edge = self.quant(sp_edge,resy) 
         self.t_sp_edge = self.quant(t_sp_edge,resz)
         self.e_gate  = self.quant(e_gate,resy) 
-        self.l_diff  = self.quant(l_diff,resx)
+        self.l_gate_space  = self.quant(l_gate_space,resx)
         self.t_substrate = self.quant(t_substrate,resz)
         self.l_diff_ext= self.quant(l_diff_ext,resx)
         self.t_diff_ext = self.quant(t_diff_ext,resz)
@@ -106,14 +108,14 @@ class finfet:
         self.l_sdJunc = self.quant(l_sdJunc,resx)
         # t_sub2gnd and t_cnt2gnd do not need quatization as there are not used in mask
         
-        assert self.TECH =='SOI' or self.TECH == 'BULK',"Undefined TECH type"
+        assert self.TECH =='SOI' or self.TECH == 'Bulk',"Undefined TECH type"
         
-        self.length = 2*self.sp_edge + 2*(self.l_sdJunc +  self.l_g2sdJunc) +\
-            (self.n_gate - 1)*(self.l_chnl+self.l_diff) + self.l_chnl 
-        self.width = 2*(self.sp_edge+ self.e_gate) +\
-            (self.n_fin -1)*(2*self.t_gox + self.w_fin + self.w_fin_space) +\
-            2*self.t_gox + self.w_fin
-        self.height = self.t_substrate + self.t_box + self.t_chnl + self.t_cnt +\
+        self.length = 2*self.l_sp_edge + 2*(self.l_sdJunc +  self.l_g2sdJunc) +\
+            (self.n_gate - 1)*(self.l_chnl+self.l_gate_space) + self.l_chnl 
+        self.width = 2*(self.w_sp_edge+ self.e_gate) +\
+            (self.n_fin -1)*(2*self.w_gox + self.w_fin + self.w_fin_space) +\
+            2*self.w_gox + self.w_fin
+        self.height = self.t_substrate + self.t_box + self.t_chnl + self.t_cont +\
             self.t_sp_edge + max(self.t_gox + self.t_gate ,self.t_diff_ext)
         #print("%d %d %d %d %d"%(self.t_substrate, self.t_box, self.t_chnl,\
         #    self.t_sp_edge, max(self.t_gox + self.t_gate ,self.t_diff_ext)))
@@ -150,26 +152,26 @@ class finfet:
             size = (self.length,self.width,self.t_box)
             self.nmos.create_t_box( origin, size)   
         
-        elif self.TECH == 'BULK':
+        elif self.TECH == 'Bulk':
             origin = (0,0,or_z)
-            sz_y = self.sp_edge + self.e_gate + self.t_gox 
+            sz_y = self.w_sp_edge + self.e_gate + self.w_gox 
             size = (self.length,sz_y,self.t_box)
             self.nmos.create_t_box( origin, size)   
             for f in range(self.n_fin) :
                 #create the fin
-                or_y = self.sp_edge + self.e_gate + self.t_gox +\
-                        f*(2*self.t_gox + self.w_fin + self.w_fin_space)
+                or_y = self.w_sp_edge + self.e_gate + self.w_gox +\
+                        f*(2*self.w_gox + self.w_fin + self.w_fin_space)
                 sz_y = self.w_fin
                 origin = (0, or_y, or_z)
                 size = (self.length,sz_y,self.t_box)
-                self.nmos.create_diffusion( origin, size, self.MOS,finfet=1)
+                self.nmos.create_diffusion( origin, size, self.MOS,finFET=1)
                 #create the box
                 or_y = or_y + sz_y
                 origin = (0, or_y, or_z)
                 if f == self.n_fin-1 :
                     sz_y =  self.width - or_y
                 else:
-                    sz_y =  2*self.t_gox + self.w_fin_space
+                    sz_y =  2*self.w_gox + self.w_fin_space
                 size = (self.length,sz_y,self.t_box)
                 self.nmos.create_t_box( origin, size)   
         or_z = or_z + self.t_box
@@ -185,17 +187,17 @@ class finfet:
         #source diffusion of fin
         for f in range(self.n_fin) :
             sz_x = self.l_g2sdJunc
-            or_y = self.sp_edge + self.e_gate + self.t_gox +\
-                    f*(2*self.t_gox + self.w_fin + self.w_fin_space)
+            or_y = self.w_sp_edge + self.e_gate + self.w_gox +\
+                    f*(2*self.w_gox + self.w_fin + self.w_fin_space)
             sz_y = self.w_fin
             origin = (or_x, or_y, or_z)
             size = (sz_x,sz_y,sz_z)
-            self.nmos.create_diffusion( origin, size, self.MOS,finfet=1)
+            self.nmos.create_diffusion( origin, size, self.MOS,finFET=1)
         for n in range(self.n_gate):
             sz_x = self.l_chnl 
-            or_x = or_x_in + self.l_g2sdJunc +  n*(self.l_chnl+self.l_diff)
+            or_x = or_x_in + self.l_g2sdJunc +  n*(self.l_chnl+self.l_gate_space)
             or_x_gate = or_x
-            or_y = self.sp_edge 
+            or_y = self.w_sp_edge 
             #surround gate
             origin = (or_x, or_y, or_z)
             sz_y = self.e_gate
@@ -207,7 +209,7 @@ class finfet:
                 # surround gate oxide 
                 or_y = or_y+sz_y
                 origin = (or_x, or_y, or_z)
-                sz_y = self.t_gox
+                sz_y = self.w_gox
                 size = (sz_x,sz_y,sz_z)
                 cond = self.nmos.cond['SiO2']
                 self.nmos.create_box(origin, size, cond)
@@ -225,17 +227,17 @@ class finfet:
                 if(n == self.n_gate -1):
                     sz_x = self.l_g2sdJunc
                 else:
-                    sz_x = self.l_diff
+                    sz_x = self.l_gate_space
                 origin = (or_x, or_y, or_z)
                 size = (sz_x,sz_y,sz_z)
-                self.nmos.create_diffusion( origin, size, self.MOS,finfet=1)
+                self.nmos.create_diffusion( origin, size, self.MOS,finFET=1)
 
                 # surround gate oxide 
                 or_x = or_x_gate
                 or_y = or_y+sz_y
                 origin = (or_x, or_y, or_z)
                 sz_x = self.l_chnl 
-                sz_y = self.t_gox
+                sz_y = self.w_gox
                 size = (sz_x,sz_y,sz_z)
                 cond = self.nmos.cond['SiO2']
                 self.nmos.create_box(origin, size, cond)
@@ -260,9 +262,9 @@ class finfet:
     def create_SD_junction(self,or_x,or_z):
         #or_x input
         sz_z = self.t_chnl
-        or_y = self.sp_edge + self.e_gate
-        sz_y = (self.n_fin -1)*(2*self.t_gox + self.w_fin + self.w_fin_space)+\
-                    2*self.t_gox + self.w_fin
+        or_y = self.w_sp_edge + self.e_gate
+        sz_y = (self.n_fin -1)*(2*self.w_gox + self.w_fin + self.w_fin_space)+\
+                    2*self.w_gox + self.w_fin
         sz_x = self.l_sdJunc
         origin = (or_x, or_y, or_z)
         size = (sz_x,sz_y,sz_z)
@@ -272,12 +274,12 @@ class finfet:
     def create_gate_oxide(self,or_x,or_z):
         #gate oxide 
         or_x_in = or_x
-        or_y = self.sp_edge + self.e_gate
-        sz_y = self.w_fin + 2*self.t_gox
+        or_y = self.w_sp_edge + self.e_gate
+        sz_y = self.w_fin + 2*self.w_gox
         
         for n in range(self.n_gate):    
             or_x = or_x_in +self. l_sdJunc + self.l_g2sdJunc +\
-                    n*(self.l_chnl+self.l_diff)
+                    n*(self.l_chnl+self.l_gate_space)
             origin = (or_x, or_y, or_z)
             self.nmos.create_gate_oxide(origin=origin, channel_width=sz_y)
         end_x = or_x + self.l_chnl
@@ -288,11 +290,11 @@ class finfet:
         #create contact
         c_or_x = or_x+(self.l_sdJunc/2)-(self.l_cont/2) 
         c_sz_x = self.l_cont
-        c_sz_z_shrt = self.t_cnt
-        c_or_y_shrt = self.sp_edge+self.e_gate
-        c_sz_y_shrt = (self.n_fin -1)*(2*self.t_gox + self.w_fin + self.w_fin_space)+\
-                    2*self.t_gox + self.w_fin
-        c_sz_z_pin = self.height - or_z - self.t_cnt
+        c_sz_z_shrt = self.t_cont
+        c_or_y_shrt = self.w_sp_edge+self.e_gate
+        c_sz_y_shrt = (self.n_fin -1)*(2*self.w_gox + self.w_fin + self.w_fin_space)+\
+                    2*self.w_gox + self.w_fin
+        c_sz_z_pin = self.height - or_z - self.t_cont
         c_or_y_pin = self.width/2 - self.w_cont/2
         c_sz_y_pin = self.w_cont
         c_or_y = c_or_y_shrt
@@ -302,7 +304,7 @@ class finfet:
         c_origin = (c_or_x, c_or_y, c_or_z)
         c_size = (c_sz_x, c_sz_y, c_sz_z)
         self.nmos.create_contact_short( c_origin, c_size)
-        c_or_z = or_z + self.t_cnt
+        c_or_z = or_z + self.t_cont
         c_sz_z = c_sz_z_pin
         c_or_y = c_or_y_pin
         c_sz_y = c_sz_y_pin
@@ -312,7 +314,7 @@ class finfet:
         for n in range(self.n_gate-1):
             #SD contact
             c_or_x =  or_x + self.l_sdJunc + self.l_g2sdJunc + self.l_chnl +\
-                self.l_diff/2 + n*(self.l_chnl+self.l_diff) - self.l_cont/2
+                self.l_gate_space/2 + n*(self.l_chnl+self.l_gate_space) - self.l_cont/2
             c_or_z = or_z 
             c_or_y = c_or_y_shrt
             c_sz_y = c_sz_y_shrt
@@ -329,7 +331,7 @@ class finfet:
             self.nmos.create_contact( c_origin, c_size)
 
         c_or_x =  or_x + self.l_sdJunc + 2*self.l_g2sdJunc +\
-            (self.n_gate-1)*(self.l_chnl + self.l_diff ) + self.l_chnl +\
+            (self.n_gate-1)*(self.l_chnl + self.l_gate_space ) + self.l_chnl +\
             (self.l_sdJunc/2) - (self.l_cont/2)
         c_or_z = or_z 
         c_or_y = c_or_y_shrt
@@ -348,10 +350,10 @@ class finfet:
 
     def create_gate(self,or_x,or_z):
         or_x_in = or_x
-        or_y = self.sp_edge
+        or_y = self.w_sp_edge
         sz_x = self.l_chnl
-        sz_y = 2*self.e_gate +(self.n_fin-1)*(2*self.t_gox + self.w_fin +\
-                self.w_fin_space) + 2*self.t_gox + self.w_fin
+        sz_y = 2*self.e_gate +(self.n_fin-1)*(2*self.w_gox + self.w_fin +\
+                self.w_fin_space) + 2*self.w_gox + self.w_fin
         sz_z = self.t_gate
         c_sz_x = self.l_cont
         c_or_y = self.width/2 -self.w_cont/2
@@ -363,7 +365,7 @@ class finfet:
         #gate 
         for n in range(self.n_gate):
             or_x = or_x_in + self.l_sdJunc + self.l_g2sdJunc +\
-                n*(self.l_chnl+self.l_diff)
+                n*(self.l_chnl+self.l_gate_space)
             origin = (or_x, or_y, or_z)
             self.nmos.create_gate(origin, gate_width=sz_y)
             #gate contact
@@ -374,24 +376,18 @@ class finfet:
 
     def create_model(self):
         or_z = self.create_substrate()
-        or_x = self.sp_edge
-        #print("1 %d %d"%(or_x,or_z))
+        or_x = self.l_sp_edge
         or_x_sd1,or_z_sd1 = self.create_SD_junction(or_x,or_z)
         or_x = or_x_sd1
-        #print("2 %d %d"%(or_x,or_z_sd1))
         or_x,or_z_chl = self.create_fins(or_x,or_z)
-        #print("3 %d %d"%(or_x,or_z_chl))
         _,or_z = self.create_SD_junction(or_x,or_z)
-        #print("4 %d %d"%(or_x,or_z))
         assert or_z == or_z_sd1 and or_z == or_z_chl,"Confirm t in code."
-        or_x = self.sp_edge
+        or_x = self.l_sp_edge
         _,or_z_gate = self.create_gate_oxide(or_x,or_z)
-        #print("5 %d %d"%(or_x,or_z_gate))
         self.create_SD_contact(or_x,or_z)
         self.create_gate(or_x,or_z_gate)
         self.nmos.filler()
         print("INFO: Completed layout drawing")
-        #print(" number of gates %d"%self.nmos.n_gate)
 
     def create_equations(self,a_gates,power): 
         print("INFO: Beginning G matrix creation")
@@ -440,7 +436,7 @@ class finfet:
         
 def main():
     parser = argparse.ArgumentParser(description="Find the temperature rise to self-heating")
-    parser.add_argument("-tech", choices= ['BULK','SOI'],
+    parser.add_argument("-tech", choices= ['Bulk','SOI'],
                         help="Provide technology name", required = True)
     parser.add_argument("-n_gate", type=int, choices= [0,1,2,3,4,5,6,7,8,9,10],
                         help="Provide number of gates", required = True)
@@ -459,9 +455,9 @@ def main():
     power = args.power
     a_gates = [int(item)for item in args.active.split(',')]
     print(a_gates)
-    TECH = args.tech #'BULK' #SOI BULK 
+    TECH = args.tech #'Bulk' #SOI Bulk 
     MOS = args.type  # NMOS or PMOS
-    SH_FF = finfet(TECH, MOS, n_gate, n_fin)
+    SH_FF = finFET(TECH, MOS, n_gate, n_fin)
     SH_FF.create_equations(a_gates,power)
     SH_FF.solve()
     SH_FF.save_model()
