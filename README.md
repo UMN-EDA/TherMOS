@@ -29,7 +29,8 @@ The various paramters to the thermal model such as the dimensions of the device 
 
 To run the software:
 
-`python3 self_heating.py -tech SOI -n_gate 2 -width 120 -type NMOS -power 2.4e-6 -active "0,1"`
+`python3 src/self_heating.py -tech SOI -n_gate 2 -width 120 -type NMOS -power 2.4e-6 -active "0,1"`
+
 
 - *tech*: this variable specifies the technology of the planar transistor. Options include: SOI, Bulk, or  NC
 - *n_gate*: number of devices/gate terminals to simulate that share a continous diffusion
