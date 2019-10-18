@@ -1,4 +1,4 @@
- = csvread('../work/device_parameters.csv');
+data = csvread('../work/device_parameters.csv');
 
 resx = data(1,1);%100.000 130.000 68.000
 resy = data(1,2);
@@ -47,5 +47,5 @@ cb = colorbar;
 cb.Label.String = "Temperature rise (K)";
 colormap(jet(256));
 saveas(f1, '../output/temperature_profile.png');
-exit();
+%exit();
 

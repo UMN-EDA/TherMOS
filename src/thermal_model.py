@@ -13,7 +13,8 @@ import scipy.sparse as sparse_mat
 #width  is along y Dimension 1
 #height is along z Dimension 2
 class thermal_model():
-    def __init__(self,length, width, height, resolution):
+    def __init__(self,length, width, height, resolution,n_fin=0):
+        self.n_fin= n_fin
         self.res_x = resolution[0]
         self.res_y = resolution[1]
         self.res_z = resolution[2]
@@ -46,22 +47,21 @@ class thermal_model():
 
         self.parameters =True;
 
-   #TODO modify to read from file
-    def set_conductivity_table(self):
+    def set_conductivity_table(self,model_file):
         self.cond = {}
-        with open('./input/model_parameters.json') as f:
+        with open(model_file) as f:
            cond_data = json.load(f) 
         self.cond['gate'] =       cond_data['thermal_conductivity']['gate'] #197e-9
         self.cond['Si NMOS SD'] = cond_data['thermal_conductivity']['Si NMOS SD'] #148e-9
         self.cond['Si PMOS SD'] = cond_data['thermal_conductivity']['Si PMOS SD'] #114e-9
+        self.cond['Si NMOS fin'] = cond_data['thermal_conductivity']['Si NMOS fin']
+        self.cond['Si PMOS fin'] = cond_data['thermal_conductivity']['Si PMOS fin'] 
         self.cond['Si substrate'] =cond_data['thermal_conductivity']['Si substrate'] #148e-9
         self.cond['SiGe PMOS channel'] = cond_data['thermal_conductivity']['SiGe PMOS channel'] #12.75e-9
         self.cond['Si NMOS channel'] = cond_data['thermal_conductivity']['Si NMOS channel'] #14.7e-9 #148e-9
         self.cond['SiO2'] = cond_data['thermal_conductivity']['SiO2'] #0.8e-9
         self.cond['spacer'] = cond_data['thermal_conductivity']['spacer'] #30e-9
         self.cond['contact'] = cond_data['thermal_conductivity']['contact'] #385e-9 # conductivity of copper
-#        for idx in self.cond:
-#            self.cond[idx] = self.cond[idx] *self.resolution
         self.cond_table =True;
 
     def quantize_values(self,val):
@@ -91,8 +91,8 @@ class thermal_model():
             "Size z coordinate out of bounds sz_z %d or_z %d"%(sz_z,or_z))
         
         assert np.count_nonzero(self.C[or_x:(or_x + sz_x),or_y:(or_y +
-        sz_y),or_z:(or_z + sz_z)]) == 0," Overlap with existing box, please check your dimensions and refer doc/UserGuide.md"
-        
+            sz_y),or_z:(or_z + sz_z)]) == 0," Overlap with existing box,"+\
+            " please check your dimensions and refer doc/UserGuide.md"
         self.C[or_x:(or_x + sz_x),or_y:(or_y + sz_y),or_z:(or_z + sz_z)] = cond
     
     def create_gate(self, origin, gate_width):
@@ -106,14 +106,20 @@ class thermal_model():
         size = (sz_x,sz_y,sz_z)
         self.create_box(origin, size, cond)
         
-
-    def create_diffusion(self, origin, size, d_type='PMOS'):
+    #TODO allow for separate conductivities for gaafet 
+    def create_diffusion(self, origin, size, d_type='PMOS',finFET=0):
         assert self.cond_table, "Set the conductivity table before designing the layout"
         assert d_type == 'PMOS' or d_type == 'NMOS', "Diffusion type not recognized"
-        if d_type == 'PMOS':
-            cond = self.cond['Si PMOS SD']
+        if finFET == 1:
+            if d_type == 'PMOS':
+                cond = self.cond['Si PMOS fin']
+            else:
+                cond = self.cond['Si NMOS fin']
         else:
-            cond = self.cond['Si NMOS SD']
+            if d_type == 'PMOS':
+                cond = self.cond['Si PMOS SD']
+            else:
+                cond = self.cond['Si NMOS SD']
         self.create_box(origin, size, cond)
 
     def create_gate_oxide(self, origin, channel_width):
@@ -163,6 +169,11 @@ class thermal_model():
         cond = self.cond['Si substrate']
         self.create_box(origin, size, cond)
         
+    def create_contact_short(self, origin, size):
+        assert self.cond_table, "Set the conductivity table before designing the layout"
+        cond = self.cond['contact']
+        self.create_box(origin, size, cond)
+
     def create_contact(self, origin, size):
         assert self.cond_table, "Set the conductivity table before designing the layout"
         cond = self.cond['contact']
@@ -246,12 +257,23 @@ class thermal_model():
         for gate in active_gates:
             #TODO modify if you require uneven distribution between gates
             pwr_gate = power/len(active_gates)
-            origin = self.gate_loc[gate]['origin']
-            size = self.gate_loc[gate]['size']
-            power_profile = self.gate_loc[gate]['power_profile']
-            (or_x, or_y, or_z) = self.quantize_values(origin)
-            (sz_x, sz_y, sz_z) = self.quantize_values(size)
-            pwr[or_x:(or_x + sz_x),or_y:(or_y + sz_y),or_z:(or_z + sz_z)] = power_profile*pwr_gate 
+            if self.n_fin == 0:
+                origin = self.gate_loc[gate]['origin']
+                size = self.gate_loc[gate]['size']
+                power_profile = self.gate_loc[gate]['power_profile']
+                (or_x, or_y, or_z) = self.quantize_values(origin)
+                (sz_x, sz_y, sz_z) = self.quantize_values(size)
+                pwr[or_x:(or_x + sz_x),or_y:(or_y + sz_y),or_z:(or_z + sz_z)] = power_profile*pwr_gate 
+            else:
+                for n in range(self.n_fin):
+                    pwr_fin = pwr_gate/self.n_fin
+                    gate_num =  gate*self.n_fin + n
+                    origin = self.gate_loc[gate_num]['origin']
+                    size = self.gate_loc[gate_num]['size']
+                    power_profile = self.gate_loc[gate_num]['power_profile']
+                    (or_x, or_y, or_z) = self.quantize_values(origin)
+                    (sz_x, sz_y, sz_z) = self.quantize_values(size)
+                    pwr[or_x:(or_x + sz_x),or_y:(or_y + sz_y),or_z:(or_z + sz_z)] = power_profile*pwr_fin 
         self.P = pwr.reshape((self.N_x*self.N_y*self.N_z,1),order='F') #fortran ordering to index x first then y then z
         
                     
