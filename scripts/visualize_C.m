@@ -37,14 +37,15 @@ colormap(jet(256));
 %codediagram=slice(x_new, y_new, z_new, T,[1 2 ], [1 2 ], 0:k_ran);
 %diagram=slice(x_new, y_new, z_new, T,[  i_ran/2-1,   i_ran/2+1,   i_ran/2+ 3 ], [  j_ran/2 ], [55, 0.56*  k_ran-20:4:0.56*  k_ran+5,110]);%k_ran);
 %diagram=slice(x_new, y_new, z_new, T,[(  j_ran)/2], [(  i_ran)/3 ], [  face]);%k_ran);
-diagram=slice(x_new, y_new, z_new, T_n(:,:,:),[w/3-1, w/2, 2*w/3+2], [l/5,l/3,l/2,2*l/3,4*l/5], [3*h/5-1.5]);%k_ran);
+%diagram=slice(x_new, y_new, z_new, T_n(:,:,:),[w/3-1, w/2, 2*w/3+2], [l/5,l/3,l/2,2*l/3,4*l/5], [3*h/5-1.5]);%k_ran);
+diagram=slice(x_new, y_new, z_new, T_n(:,:,:),[w/3-1, w/2, 2*w/3+2], [l/3,l/2,2*l/3], [3*h/5-1.5]);%k_ran);
 
 xlabel('width')
 ylabel('length')
 zlabel('hieght')
 disp("Plotting the temperature profile...")
 cb = colorbar;
-cb.Label.String = "Temperature rise (K)";
+cb.Label.String = "Thermal conductivity (K)";
 colormap(jet(256));
 saveas(f1, '../output/temperature_profile.png');
 %exit();
