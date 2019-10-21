@@ -19,11 +19,9 @@ from thermal_model import thermal_model
 #width  is along y Dimension 1
 #height is along z Dimension 2
 
-f_model_param = './input/model_parameters_planar.json'
-f_tool_config = './input/tool_config.json'
 
-class planar:
-    def __init__(self,TECH, MOS, n_gate, width):
+class MOSFET:
+    def __init__(self,TECH, MOS, n_gate, width,f_model_param,f_tool_config):
         self.TECH = TECH
         self.MOS = MOS
         self.n_gate = n_gate
@@ -114,14 +112,14 @@ class planar:
                 self.length,self.width,self.height))
         print("INFO: Resolution : %4.3e %4.3e %4.3e"%(resx,resy,resz))
         
-        self.nmos = thermal_model(
+        self.device = thermal_model(
                     length = self.length, 
                     width = self.width, 
                     height = self.height, 
                     resolution = self.res
                     )
               
-        self.nmos.set_device_parameters(  
+        self.device.set_device_parameters(  
                                    channel_length = self.l_chnl, 
                                    gate_thickness = self.t_gate,
                                    substrate2ground = self.t_sub2gnd,
@@ -129,23 +127,23 @@ class planar:
                                    gate_oxide_thickness = self.t_gox 
                                    )
                                    
-        self.nmos.set_conductivity_table(f_model_param)
+        self.device.set_conductivity_table(f_model_param)
         print("INFO: Initialization complete")
 
 #bottom up approach to building
     def create_substrate(self):
         #substrate
         if self.TECH == 'SOI':
-            self.nmos.create_substrate(thickness = self.t_substrate)
+            self.device.create_substrate(thickness = self.t_substrate)
         #t_box
             or_z = self.t_substrate
             origin = (0,0,or_z)
             size = (self.length,self.width,self.t_box)
-            self.nmos.create_t_box( origin, size)   
+            self.device.create_t_box( origin, size)   
         
             or_z = or_z + self.t_box
         elif self.TECH == 'Bulk':
-            self.nmos.create_substrate(thickness = (self.t_substrate+self.t_box))
+            self.device.create_substrate(thickness = (self.t_substrate+self.t_box))
             or_z = self.t_substrate + self.t_box
         return or_z
     
@@ -160,7 +158,7 @@ class planar:
         #print("origin size SD Junc")
         #pprint(origin)
         #pprint(size)
-        self.nmos.create_diffusion( origin, size, self.MOS)
+        self.device.create_diffusion( origin, size, self.MOS)
         return or_x + sz_x, or_z + sz_z
 
     def create_channel(self, or_x_in, or_z_in):
@@ -173,7 +171,7 @@ class planar:
             or_x = or_x_in + n*(self.l_chnl + self.l_gate_space)
             #print("or_x %d"%or_x )
             origin = (or_x, or_y, or_z)
-            self.nmos.create_channel( origin=origin, channel_width=sz_y,
+            self.device.create_channel( origin=origin, channel_width=sz_y,
             channel_depth=sz_z, d_type=self.MOS)
             
             if(n<self.n_gate-1): 
@@ -185,7 +183,7 @@ class planar:
                 #print("origin size SD diff")
                 #pprint(origin)
                 #pprint(size)
-                self.nmos.create_diffusion( origin, size, self.MOS)
+                self.device.create_diffusion( origin, size, self.MOS)
         end_x = or_x + self.l_chnl 
         end_z = or_z + sz_z
         return end_x, end_z
@@ -203,7 +201,7 @@ class planar:
             #pprint(origin)
             #size = (self.l_chnl,sz_y,self.t_gox)
             #pprint(size)
-            self.nmos.create_gate_oxide(origin=origin, channel_width=sz_y)
+            self.device.create_gate_oxide(origin=origin, channel_width=sz_y)
         return or_x+self.l_chnl, or_z+self.t_gox
 
     def create_SD_contact(self, or_x_in, or_z_in):
@@ -221,7 +219,7 @@ class planar:
         #print("origin size SD Contact")
         #pprint(origin)
         #pprint(size)
-        self.nmos.create_diffusion( origin, size, self.MOS)
+        self.device.create_diffusion( origin, size, self.MOS)
         #create contact
         c_or_x = or_x+(sz_x/2)-(self.l_cont/2) 
         c_sz_x = self.l_cont
@@ -231,26 +229,26 @@ class planar:
         c_sz_z = self.height - c_or_z
         c_origin = (c_or_x, c_or_y, c_or_z)
         c_size = (c_sz_x, c_sz_y, c_sz_z)
-        self.nmos.create_contact( c_origin, c_size)     
+        self.device.create_contact( c_origin, c_size)     
         for n in range(self.n_gate-1):
             #sd extension
             or_x = or_x_in + self.l_sdJunc + n*(self.l_gate_space+ self.l_chnl) +\
                 self.l_chnl + self.l_gate_space/2 - self.l_diff_ext/2
             origin = (or_x, or_y, or_z)
-            self.nmos.create_diffusion(origin, size,self.MOS)
+            self.device.create_diffusion(origin, size,self.MOS)
             #SD contact
             c_or_x = or_x+(sz_x/2)-(self.l_cont/2) 
             c_origin = (c_or_x, c_or_y, c_or_z)
-            self.nmos.create_contact( c_origin, c_size)
+            self.device.create_contact( c_origin, c_size)
         #drain extension
         or_x = or_x_in + self.l_sdJunc + (self.n_gate-1)*(self.l_gate_space+ self.l_chnl) +\
             self.l_chnl + self.l_sdJunc/2 - self.l_diff_ext/2
         origin = (or_x, or_y, or_z)
-        self.nmos.create_diffusion(origin, size,self.MOS)
+        self.device.create_diffusion(origin, size,self.MOS)
         #SD contact
         c_or_x = or_x+(sz_x/2)-(self.l_cont/2) 
         c_origin = (c_or_x, c_or_y, c_or_z)
-        self.nmos.create_contact( c_origin, c_size)
+        self.device.create_contact( c_origin, c_size)
 
     def create_gate(self,or_x_in,or_z):
         or_y = self.w_sp_edge
@@ -268,11 +266,11 @@ class planar:
         for n in range(self.n_gate):
             or_x = or_x_in + self.l_sdJunc + n*(self.l_gate_space+self.l_chnl)
             origin = (or_x, or_y, or_z)
-            self.nmos.create_gate(origin, gate_width=sz_y)
+            self.device.create_gate(origin, gate_width=sz_y)
             #gate contact
             c_or_x = or_x+(sz_x/2)-(self.l_cont/2) 
             c_origin = (c_or_x, c_or_y, c_or_z)
-            self.nmos.create_contact( c_origin, c_size)
+            self.device.create_contact( c_origin, c_size)
         
     def create_model(self):
         or_z = self.create_substrate()
@@ -286,25 +284,25 @@ class planar:
         _,or_z_gate = self.create_gate_oxide(or_x,or_z)
         self.create_SD_contact(or_x,or_z)
         self.create_gate(or_x,or_z_gate)
-        self.nmos.filler()
+        self.device.filler()
         print("INFO: Completed layout drawing")
 
     def create_equations(self,a_gates,power): 
         print("INFO: Beginning G matrix creation")
         # create G matrix
         s1 = time.time()
-        self.nmos.create_G()
+        self.device.create_G()
         e1 = time.time()
         print("INFO: Completed G matrix in %e"%(e1-s1))
         s1=time.time()
-        self.nmos.create_P(a_gates,power)
+        self.device.create_P(a_gates,power)
         e1 = time.time()
         print("INFO: Completed P matrix in %e"%(e1-s1))
 
     def solve(self):
         #solve the equations
-        G = self.nmos.G.tocsc()
-        P = sparse_mat.csc_matrix(self.nmos.P)
+        G = self.device.G.tocsc()
+        P = sparse_mat.csc_matrix(self.device.P)
         I = sparse_mat.identity(G.shape[0]) * 1e-13
         G = G + I
         print("INFO: Size of matrix %d x %d"%G.shape)
@@ -322,11 +320,11 @@ class planar:
         print("Result: Max temperature rise:%e"%(max(T)))
         print("Result: Minimum temperature rise: %e"%(min(T)))
         print("Result: Average temperature rise: %e"%(np.average(T)))
-        T= T.reshape((self.nmos.N_x,self.nmos.N_y,self.nmos.N_z),order='F')
+        T= T.reshape((self.device.N_x,self.device.N_y,self.device.N_z),order='F')
 
 
     def save_model(self):
-        C= self.nmos.C.reshape((-1),order='f')
+        C= self.device.C.reshape((-1),order='f')
         np.savetxt('./work/C.out',C)
         print("\n")
         
@@ -359,7 +357,7 @@ def main():
     
     TECH = args.tech #'Bulk' #SOI Bulk 
     MOS = args.type  # NMOS or PMOS
-    SH_PL = planar(TECH, MOS, n_gate, w_chnl)
+    SH_PL = MSOFET(TECH, MOS, n_gate, w_chnl)
     SH_PL.create_equations(a_gates,power)
     SH_PL.solve()
     SH_PL.save_model()

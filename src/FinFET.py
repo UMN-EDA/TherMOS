@@ -20,11 +20,8 @@ from thermal_model import thermal_model
 #height is along z Dimension 2
 
 
-f_model_param = './input/model_parameters_finfet.json'
-f_tool_config = './input/tool_config.json'
-
-class finFET:
-    def __init__(self,TECH, MOS, n_gate, n_fin):
+class FinFET:
+    def __init__(self,TECH, MOS, n_gate, n_fin, f_model_param, f_tool_config):
         self.TECH = TECH
         self.MOS = MOS
         self.n_gate = n_gate
@@ -124,7 +121,7 @@ class finFET:
         print("INFO: Resolution : %4.3e %4.3e %4.3e"%(
             self.resx,self.resy,self.resz))
         
-        self.nmos = thermal_model(
+        self.device = thermal_model(
                     length = self.length, 
                     width = self.width, 
                     height = self.height, 
@@ -132,7 +129,7 @@ class finFET:
                     n_fin = self.n_fin
                     )
               
-        self.nmos.set_device_parameters(  
+        self.device.set_device_parameters(  
                                    channel_length = self.l_chnl, 
                                    gate_thickness = self.t_gate,
                                    substrate2ground = self.t_sub2gnd,
@@ -140,23 +137,23 @@ class finFET:
                                    gate_oxide_thickness = self.t_gox 
                                    )
                                    
-        self.nmos.set_conductivity_table(file_model_param)
+        self.device.set_conductivity_table(file_model_param)
         print("INFO: Initialization complete")
 
     def create_substrate(self):
-        self.nmos.create_substrate(thickness = self.t_substrate)
+        self.device.create_substrate(thickness = self.t_substrate)
         or_z = self.t_substrate
         if self.TECH == 'SOI':
         #t_box
             origin = (0,0,or_z)
             size = (self.length,self.width,self.t_box)
-            self.nmos.create_t_box( origin, size)   
+            self.device.create_t_box( origin, size)   
         
         elif self.TECH == 'Bulk':
             origin = (0,0,or_z)
             sz_y = self.w_sp_edge + self.e_gate + self.w_gox 
             size = (self.length,sz_y,self.t_box)
-            self.nmos.create_t_box( origin, size)   
+            self.device.create_t_box( origin, size)   
             for f in range(self.n_fin) :
                 #create the fin
                 or_y = self.w_sp_edge + self.e_gate + self.w_gox +\
@@ -164,7 +161,7 @@ class finFET:
                 sz_y = self.w_fin
                 origin = (0, or_y, or_z)
                 size = (self.length,sz_y,self.t_box)
-                self.nmos.create_diffusion( origin, size, self.MOS,finFET=1)
+                self.device.create_diffusion( origin, size, self.MOS,finFET=1)
                 #create the box
                 or_y = or_y + sz_y
                 origin = (0, or_y, or_z)
@@ -173,7 +170,7 @@ class finFET:
                 else:
                     sz_y =  2*self.w_gox + self.w_fin_space
                 size = (self.length,sz_y,self.t_box)
-                self.nmos.create_t_box( origin, size)   
+                self.device.create_t_box( origin, size)   
         or_z = or_z + self.t_box
         return or_z
 
@@ -192,7 +189,7 @@ class finFET:
             sz_y = self.w_fin
             origin = (or_x, or_y, or_z)
             size = (sz_x,sz_y,sz_z)
-            self.nmos.create_diffusion( origin, size, self.MOS,finFET=1)
+            self.device.create_diffusion( origin, size, self.MOS,finFET=1)
         for n in range(self.n_gate):
             sz_x = self.l_chnl 
             or_x = or_x_in + self.l_g2sdJunc +  n*(self.l_chnl+self.l_gate_space)
@@ -202,8 +199,8 @@ class finFET:
             origin = (or_x, or_y, or_z)
             sz_y = self.e_gate
             size = (sz_x,sz_y,sz_z+self.t_gox)
-            cond = self.nmos.cond['gate']
-            self.nmos.create_box(origin, size, cond)
+            cond = self.device.cond['gate']
+            self.device.create_box(origin, size, cond)
             
             for f in range(self.n_fin) :
                 # surround gate oxide 
@@ -211,15 +208,15 @@ class finFET:
                 origin = (or_x, or_y, or_z)
                 sz_y = self.w_gox
                 size = (sz_x,sz_y,sz_z)
-                cond = self.nmos.cond['SiO2']
-                self.nmos.create_box(origin, size, cond)
+                cond = self.device.cond['SiO2']
+                self.device.create_box(origin, size, cond)
 
                 #channel
                 or_x = or_x_gate
                 or_y = or_y+sz_y                
                 sz_y = self.w_fin
                 origin = (or_x, or_y, or_z)
-                self.nmos.create_channel( origin=origin, channel_width=sz_y, 
+                self.device.create_channel( origin=origin, channel_width=sz_y, 
                         channel_depth=sz_z, d_type=self.MOS)
 
                 # drain diffusion
@@ -230,7 +227,7 @@ class finFET:
                     sz_x = self.l_gate_space
                 origin = (or_x, or_y, or_z)
                 size = (sz_x,sz_y,sz_z)
-                self.nmos.create_diffusion( origin, size, self.MOS,finFET=1)
+                self.device.create_diffusion( origin, size, self.MOS,finFET=1)
 
                 # surround gate oxide 
                 or_x = or_x_gate
@@ -239,8 +236,8 @@ class finFET:
                 sz_x = self.l_chnl 
                 sz_y = self.w_gox
                 size = (sz_x,sz_y,sz_z)
-                cond = self.nmos.cond['SiO2']
-                self.nmos.create_box(origin, size, cond)
+                cond = self.device.cond['SiO2']
+                self.device.create_box(origin, size, cond)
                 #surround gate
                 or_x = or_x_gate
                 or_y = or_y+sz_y
@@ -251,8 +248,8 @@ class finFET:
                 else:
                     sz_y = self.w_fin_space
                 size = (sz_x,sz_y,sz_z+self.t_gox)
-                cond = self.nmos.cond['gate']
-                self.nmos.create_box(origin, size, cond)
+                cond = self.device.cond['gate']
+                self.device.create_box(origin, size, cond)
 
                 
         end_x = or_x_gate + self.l_chnl + self.l_g2sdJunc 
@@ -268,7 +265,7 @@ class finFET:
         sz_x = self.l_sdJunc
         origin = (or_x, or_y, or_z)
         size = (sz_x,sz_y,sz_z)
-        self.nmos.create_diffusion( origin, size, self.MOS)
+        self.device.create_diffusion( origin, size, self.MOS)
         return or_x + sz_x, or_z + sz_z
 
     def create_gate_oxide(self,or_x,or_z):
@@ -281,7 +278,7 @@ class finFET:
             or_x = or_x_in +self. l_sdJunc + self.l_g2sdJunc +\
                     n*(self.l_chnl+self.l_gate_space)
             origin = (or_x, or_y, or_z)
-            self.nmos.create_gate_oxide(origin=origin, channel_width=sz_y)
+            self.device.create_gate_oxide(origin=origin, channel_width=sz_y)
         end_x = or_x + self.l_chnl
         end_z = or_z + self.t_gox
         return end_x,end_z 
@@ -303,14 +300,14 @@ class finFET:
         c_or_z = or_z 
         c_origin = (c_or_x, c_or_y, c_or_z)
         c_size = (c_sz_x, c_sz_y, c_sz_z)
-        self.nmos.create_contact_short( c_origin, c_size)
+        self.device.create_contact_short( c_origin, c_size)
         c_or_z = or_z + self.t_cont
         c_sz_z = c_sz_z_pin
         c_or_y = c_or_y_pin
         c_sz_y = c_sz_y_pin
         c_origin = (c_or_x, c_or_y, c_or_z)
         c_size = (c_sz_x, c_sz_y, c_sz_z)
-        self.nmos.create_contact( c_origin, c_size)
+        self.device.create_contact( c_origin, c_size)
         for n in range(self.n_gate-1):
             #SD contact
             c_or_x =  or_x + self.l_sdJunc + self.l_g2sdJunc + self.l_chnl +\
@@ -321,14 +318,14 @@ class finFET:
             c_sz_z = c_sz_z_shrt
             c_origin = (c_or_x, c_or_y, c_or_z)
             c_size = (c_sz_x, c_sz_y, c_sz_z)
-            self.nmos.create_contact_short( c_origin, c_size)
+            self.device.create_contact_short( c_origin, c_size)
             c_or_z = c_or_z + c_sz_z
             c_or_y = c_or_y_pin
             c_sz_y = c_sz_y_pin
             c_sz_z = c_sz_z_pin
             c_origin = (c_or_x, c_or_y, c_or_z)
             c_size = (c_sz_x, c_sz_y, c_sz_z)
-            self.nmos.create_contact( c_origin, c_size)
+            self.device.create_contact( c_origin, c_size)
 
         c_or_x =  or_x + self.l_sdJunc + 2*self.l_g2sdJunc +\
             (self.n_gate-1)*(self.l_chnl + self.l_gate_space ) + self.l_chnl +\
@@ -339,14 +336,14 @@ class finFET:
         c_sz_z = c_sz_z_shrt
         c_origin = (c_or_x, c_or_y, c_or_z)
         c_size = (c_sz_x, c_sz_y, c_sz_z)
-        self.nmos.create_contact_short( c_origin, c_size)
+        self.device.create_contact_short( c_origin, c_size)
         c_or_z = c_or_z + c_sz_z
         c_sz_z = c_sz_z_pin
         c_or_y = c_or_y_pin
         c_sz_y = c_sz_y_pin
         c_origin = (c_or_x, c_or_y, c_or_z)
         c_size = (c_sz_x, c_sz_y, c_sz_z)
-        self.nmos.create_contact( c_origin, c_size)
+        self.device.create_contact( c_origin, c_size)
 
     def create_gate(self,or_x,or_z):
         or_x_in = or_x
@@ -367,11 +364,11 @@ class finFET:
             or_x = or_x_in + self.l_sdJunc + self.l_g2sdJunc +\
                 n*(self.l_chnl+self.l_gate_space)
             origin = (or_x, or_y, or_z)
-            self.nmos.create_gate(origin, gate_width=sz_y)
+            self.device.create_gate(origin, gate_width=sz_y)
             #gate contact
             c_or_x = or_x+(sz_x/2)-(self.l_cont/2) 
             c_origin = (c_or_x, c_or_y, c_or_z)
-            self.nmos.create_contact( c_origin, c_size)
+            self.device.create_contact( c_origin, c_size)
 
 
     def create_model(self):
@@ -386,46 +383,46 @@ class finFET:
         _,or_z_gate = self.create_gate_oxide(or_x,or_z)
         self.create_SD_contact(or_x,or_z)
         self.create_gate(or_x,or_z_gate)
-        self.nmos.filler()
+        self.device.filler()
         print("INFO: Completed layout drawing")
 
-    def create_equations(self,a_gates,power): 
-        print("INFO: Beginning G matrix creation")
-        # create G matrix
-        s1 = time.time()
-        self.nmos.create_G()
-        e1 = time.time()
-        print("INFO: Completed G matrix in %e"%(e1-s1))
-        s1=time.time()
-        self.nmos.create_P(a_gates,power)
-        e1 = time.time()
-        print("INFO: Completed P matrix in %e"%(e1-s1))
+    #def create_equations(self,a_gates,power): 
+    #    print("INFO: Beginning G matrix creation")
+    #    # create G matrix
+    #    s1 = time.time()
+    #    self.device.create_G()
+    #    e1 = time.time()
+    #    print("INFO: Completed G matrix in %e"%(e1-s1))
+    #    s1=time.time()
+    #    self.device.create_P(a_gates,power)
+    #    e1 = time.time()
+    #    print("INFO: Completed P matrix in %e"%(e1-s1))
 
-    def solve(self):
-        #solve the equations
-        G = self.nmos.G.tocsc()
-        P = sparse_mat.csc_matrix(self.nmos.P)
-        I = sparse_mat.identity(G.shape[0]) * 1e-13
-        G = G + I
-        print("INFO: Size of matrix %d x %d"%G.shape)
-        print("INFO: Number of Non zeros %d"%G.nnz)
-        print("INFO: Solving for temperature")
-        s1=time.time()
-        T = sparse_algebra.spsolve(G, P, permc_spec=None, use_umfpack=True)
-        e1=time.time()
-        
-        print("INFO: Completed solving in %e"%(e1-s1))
-        np.savetxt('./output/T.out',T)
-        np.savetxt('./work/T.out',T)
-        
-        
-        print("Result: Max temperature rise:%e"%(max(T)))
-        print("Result: Minimum temperature rise: %e"%(min(T)))
-        print("Result: Average temperature rise: %e"%(np.average(T)))
-        T= T.reshape((self.nmos.N_x,self.nmos.N_y,self.nmos.N_z),order='F')
+    #def solve(self):
+    #    #solve the equations
+    #    G = self.device.G.tocsc()
+    #    P = sparse_mat.csc_matrix(self.device.P)
+    #    I = sparse_mat.identity(G.shape[0]) * 1e-13
+    #    G = G + I
+    #    print("INFO: Size of matrix %d x %d"%G.shape)
+    #    print("INFO: Number of Non zeros %d"%G.nnz)
+    #    print("INFO: Solving for temperature")
+    #    s1=time.time()
+    #    T = sparse_algebra.spsolve(G, P, permc_spec=None, use_umfpack=True)
+    #    e1=time.time()
+    #    
+    #    print("INFO: Completed solving in %e"%(e1-s1))
+    #    np.savetxt('./output/T.out',T)
+    #    np.savetxt('./work/T.out',T)
+    #    
+    #    
+    #    print("Result: Max temperature rise:%e"%(max(T)))
+    #    print("Result: Minimum temperature rise: %e"%(min(T)))
+    #    print("Result: Average temperature rise: %e"%(np.average(T)))
+    #    T= T.reshape((self.device.N_x,self.device.N_y,self.device.N_z),order='F')
 
     def save_model(self):
-        C= self.nmos.C.reshape((-1),order='f')
+        C= self.device.C.reshape((-1),order='f')
         np.savetxt('./work/C.out',C)
         print("\n")
         
@@ -457,7 +454,7 @@ def main():
     print(a_gates)
     TECH = args.tech #'Bulk' #SOI Bulk 
     MOS = args.type  # NMOS or PMOS
-    SH_FF = finFET(TECH, MOS, n_gate, n_fin)
+    SH_FF = FinFET(TECH, MOS, n_gate, n_fin)
     SH_FF.create_equations(a_gates,power)
     SH_FF.solve()
     SH_FF.save_model()
