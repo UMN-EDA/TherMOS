@@ -12,7 +12,7 @@ import scipy.sparse as sparse_mat
 import scipy.sparse.linalg as sparse_algebra
 from pprint import pprint
 
-from thermal_model import thermal_model
+from thermalModel import thermalModel
 
 #direction convention  
 #length is along x Dimesion 0
@@ -121,7 +121,7 @@ class FinFET:
         print("INFO: Resolution : %4.3e %4.3e %4.3e"%(
             self.resx,self.resy,self.resz))
         
-        self.device = thermal_model(
+        self.device = thermalModel(
                     length = self.length, 
                     width = self.width, 
                     height = self.height, 

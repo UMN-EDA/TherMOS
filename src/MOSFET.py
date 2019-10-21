@@ -12,7 +12,7 @@ import scipy.sparse as sparse_mat
 import scipy.sparse.linalg as sparse_algebra
 from pprint import pprint
 
-from thermal_model import thermal_model
+from thermalModel import thermalModel
 
 #direction convention  
 #length is along x Dimesion 0
@@ -112,7 +112,7 @@ class MOSFET:
                 self.length,self.width,self.height))
         print("INFO: Resolution : %4.3e %4.3e %4.3e"%(resx,resy,resz))
         
-        self.device = thermal_model(
+        self.device = thermalModel(
                     length = self.length, 
                     width = self.width, 
                     height = self.height, 
