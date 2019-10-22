@@ -13,7 +13,7 @@ from pprint import pprint
 #from thermal_model import thermal_model
 
 class tempSolve:
-    def __init__ (self, device_model, a_gates, power):
+    def __init__ (self, device_model):
         self.G = sparse_mat.dok_matrix((device_model.N_x*device_model.N_y*device_model.N_z,
                 device_model.N_x*device_model.N_y*device_model.N_z))
         self.P = np.zeros((device_model.N_x, device_model.N_y, device_model.N_z))
@@ -72,7 +72,7 @@ class tempSolve:
                         self.G[cur_node,cur_node] = self.G[cur_node,cur_node]+ cond
 
 
-    def create_P(self,device_model,active_gates,power):
+    def create_P(self,device_model,active_gates,power, percent):
         # active gates is list type and contains all the gates you like to
         # distribute power across
         assert isinstance(active_gates,list),"active_gates expected type list but received type %s instead"%(type(active_gates)) 
@@ -80,7 +80,7 @@ class tempSolve:
         #TODO modify so that it reuse the create box function
         for gate in active_gates:
             #TODO modify if you require uneven distribution between gates
-            pwr_gate = power/len(active_gates)
+            pwr_gate = power/(percent[gate]/100)
             if device_model.n_fin == 0:
                 origin = device_model.gate_loc[gate]['origin']
                 size = device_model.gate_loc[gate]['size']
@@ -109,7 +109,8 @@ class tempSolve:
         else:
             return device_model.N_x * device_model.N_y * k + j* device_model.N_x + i
 
-    def create_equations(self,device_model, a_gates,power): 
+    def create_equations(self,device_model, a_gates,power, percent): 
+
         print("INFO: Beginning G matrix creation")
         # create G matrix
         s1 = time.time()
@@ -117,7 +118,7 @@ class tempSolve:
         e1 = time.time()
         print("INFO: Completed G matrix in %e"%(e1-s1))
         s1=time.time()
-        self.create_P(device_model,a_gates,power)
+        self.create_P(device_model,a_gates,power, percent)
         e1 = time.time()
         print("INFO: Completed P matrix in %e"%(e1-s1))
 

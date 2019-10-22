@@ -64,8 +64,8 @@ class FinFET:
         sp_edge   = tool_config["sp_edge"] #5   # spacing to the edges
         t_sp_edge = tool_config["t_sp_edge"] #20   # spacing to the edges
 
-        l_g2sdJunc = model_param["dimensions"]["l_g2sdJunc"]
-        l_sdJunc = model_param["dimensions"]["l_sdJunc"]
+        l_g2sd_junc = model_param["dimensions"]["l_g2sd_junc"]
+        l_sd_junc = model_param["dimensions"]["l_sd_junc"]
 
         w_fin =  model_param["dimensions"]["w_fin"]
         w_fin_space =  model_param["dimensions"]["w_fin_space"]
@@ -101,13 +101,13 @@ class FinFET:
         self.l_sp_diff_ext = self.quant(l_sp_diff_ext,resx)
         self.l_cont = self.quant(l_cont,resx)
         self.w_cont = self.quant(w_cont,resy)
-        self.l_g2sdJunc = self.quant(l_g2sdJunc,resx)
-        self.l_sdJunc = self.quant(l_sdJunc,resx)
+        self.l_g2sd_junc = self.quant(l_g2sd_junc,resx)
+        self.l_sd_junc = self.quant(l_sd_junc,resx)
         # t_sub2gnd and t_cnt2gnd do not need quatization as there are not used in mask
         
         assert self.TECH =='SOI' or self.TECH == 'Bulk',"Undefined TECH type"
         
-        self.length = 2*self.l_sp_edge + 2*(self.l_sdJunc +  self.l_g2sdJunc) +\
+        self.length = 2*self.l_sp_edge + 2*(self.l_sd_junc +  self.l_g2sd_junc) +\
             (self.n_gate - 1)*(self.l_chnl+self.l_gate_space) + self.l_chnl 
         self.width = 2*(self.w_sp_edge+ self.e_gate) +\
             (self.n_fin -1)*(2*self.w_gox + self.w_fin + self.w_fin_space) +\
@@ -183,7 +183,7 @@ class FinFET:
         sz_z = self.t_chnl
         #source diffusion of fin
         for f in range(self.n_fin) :
-            sz_x = self.l_g2sdJunc
+            sz_x = self.l_g2sd_junc
             or_y = self.w_sp_edge + self.e_gate + self.w_gox +\
                     f*(2*self.w_gox + self.w_fin + self.w_fin_space)
             sz_y = self.w_fin
@@ -192,7 +192,7 @@ class FinFET:
             self.device.create_diffusion( origin, size, self.MOS,finFET=1)
         for n in range(self.n_gate):
             sz_x = self.l_chnl 
-            or_x = or_x_in + self.l_g2sdJunc +  n*(self.l_chnl+self.l_gate_space)
+            or_x = or_x_in + self.l_g2sd_junc +  n*(self.l_chnl+self.l_gate_space)
             or_x_gate = or_x
             or_y = self.w_sp_edge 
             #surround gate
@@ -222,7 +222,7 @@ class FinFET:
                 # drain diffusion
                 or_x = or_x_gate + self.l_chnl
                 if(n == self.n_gate -1):
-                    sz_x = self.l_g2sdJunc
+                    sz_x = self.l_g2sd_junc
                 else:
                     sz_x = self.l_gate_space
                 origin = (or_x, or_y, or_z)
@@ -252,7 +252,7 @@ class FinFET:
                 self.device.create_box(origin, size, cond)
 
                 
-        end_x = or_x_gate + self.l_chnl + self.l_g2sdJunc 
+        end_x = or_x_gate + self.l_chnl + self.l_g2sd_junc 
         end_z = or_z + sz_z
         return end_x, end_z
 
@@ -262,7 +262,7 @@ class FinFET:
         or_y = self.w_sp_edge + self.e_gate
         sz_y = (self.n_fin -1)*(2*self.w_gox + self.w_fin + self.w_fin_space)+\
                     2*self.w_gox + self.w_fin
-        sz_x = self.l_sdJunc
+        sz_x = self.l_sd_junc
         origin = (or_x, or_y, or_z)
         size = (sz_x,sz_y,sz_z)
         self.device.create_diffusion( origin, size, self.MOS)
@@ -275,7 +275,7 @@ class FinFET:
         sz_y = self.w_fin + 2*self.w_gox
         
         for n in range(self.n_gate):    
-            or_x = or_x_in +self. l_sdJunc + self.l_g2sdJunc +\
+            or_x = or_x_in +self. l_sd_junc + self.l_g2sd_junc +\
                     n*(self.l_chnl+self.l_gate_space)
             origin = (or_x, or_y, or_z)
             self.device.create_gate_oxide(origin=origin, channel_width=sz_y)
@@ -285,7 +285,7 @@ class FinFET:
 
     def create_SD_contact(self,or_x,or_z):
         #create contact
-        c_or_x = or_x+(self.l_sdJunc/2)-(self.l_cont/2) 
+        c_or_x = or_x+(self.l_sd_junc/2)-(self.l_cont/2) 
         c_sz_x = self.l_cont
         c_sz_z_shrt = self.t_cont
         c_or_y_shrt = self.w_sp_edge+self.e_gate
@@ -310,7 +310,7 @@ class FinFET:
         self.device.create_contact( c_origin, c_size)
         for n in range(self.n_gate-1):
             #SD contact
-            c_or_x =  or_x + self.l_sdJunc + self.l_g2sdJunc + self.l_chnl +\
+            c_or_x =  or_x + self.l_sd_junc + self.l_g2sd_junc + self.l_chnl +\
                 self.l_gate_space/2 + n*(self.l_chnl+self.l_gate_space) - self.l_cont/2
             c_or_z = or_z 
             c_or_y = c_or_y_shrt
@@ -327,9 +327,9 @@ class FinFET:
             c_size = (c_sz_x, c_sz_y, c_sz_z)
             self.device.create_contact( c_origin, c_size)
 
-        c_or_x =  or_x + self.l_sdJunc + 2*self.l_g2sdJunc +\
+        c_or_x =  or_x + self.l_sd_junc + 2*self.l_g2sd_junc +\
             (self.n_gate-1)*(self.l_chnl + self.l_gate_space ) + self.l_chnl +\
-            (self.l_sdJunc/2) - (self.l_cont/2)
+            (self.l_sd_junc/2) - (self.l_cont/2)
         c_or_z = or_z 
         c_or_y = c_or_y_shrt
         c_sz_y = c_sz_y_shrt
@@ -361,7 +361,7 @@ class FinFET:
 
         #gate 
         for n in range(self.n_gate):
-            or_x = or_x_in + self.l_sdJunc + self.l_g2sdJunc +\
+            or_x = or_x_in + self.l_sd_junc + self.l_g2sd_junc +\
                 n*(self.l_chnl+self.l_gate_space)
             origin = (or_x, or_y, or_z)
             self.device.create_gate(origin, gate_width=sz_y)

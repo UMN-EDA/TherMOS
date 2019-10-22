@@ -52,7 +52,7 @@ class MOSFET:
         t_chnl = model_param["dimensions"]["t_chnl"] #6   # thickness of channel, source and drain diffusions
         t_gox  = model_param["dimensions"]["t_gox"] #1   # thickness of gate oxide
         t_diff_ext = model_param["dimensions"]["t_diff_ext"] #20 # height of the diffusion extension above the diffusion
-        l_sdJunc = model_param["dimensions"]["l_sdJunc"]
+        l_sd_junc = model_param["dimensions"]["l_sd_junc"]
         
         e_gate  = model_param["dimensions"]["e_gate"] #10  # extension of gate out of diffusion
         l_gate_space  =  model_param["dimensions"]["l_gate_space"] #35 # lenght of source and drain diffusion
@@ -96,13 +96,13 @@ class MOSFET:
         self.l_sp_diff_ext = self.quant(l_sp_diff_ext,resx)
         self.l_cont = self.quant(l_cont,resx)
         self.w_cont = self.quant(w_cont,resy)
-        self.l_sdJunc = self.quant(l_sdJunc,resx)
+        self.l_sd_junc = self.quant(l_sd_junc,resx)
 
         # t_sub2gnd and t_cnt2gnd do not need quatization as there are not used in mask
         
         assert self.TECH =='SOI' or self.TECH == 'Bulk',"Undefined TECH type"
         
-        self.length = 2*self.l_sp_edge + 2*self.l_sdJunc +\
+        self.length = 2*self.l_sp_edge + 2*self.l_sd_junc +\
             self.n_gate*self.l_chnl+(self.n_gate-1)*l_gate_space
         self.width = 2*(self.w_sp_edge+ self.e_gate) + self.w_chnl
         self.height = self.t_substrate + self.t_box + self.t_chnl +\
@@ -150,7 +150,7 @@ class MOSFET:
     def create_SD_junction(self, or_x, or_z):
     #create channel source and drain diffusions
         or_y = self.w_sp_edge+ self.e_gate
-        sz_x = self.l_sdJunc 
+        sz_x = self.l_sd_junc 
         sz_y = self.w_chnl
         sz_z = self.t_chnl
         origin = (or_x, or_y, or_z)
@@ -195,7 +195,7 @@ class MOSFET:
         sz_y = self.w_chnl
         
         for n in range(self.n_gate):    
-            or_x = or_x_in+self.l_sdJunc+n*(self.l_gate_space+self.l_chnl)
+            or_x = or_x_in+self.l_sd_junc+n*(self.l_gate_space+self.l_chnl)
             origin = (or_x, or_y, or_z)
             #print("origin size gox")
             #pprint(origin)
@@ -212,7 +212,7 @@ class MOSFET:
         sz_y = self.w_chnl
         
         #source extension
-        or_x = or_x_in + self.l_sdJunc/2 - self.l_diff_ext/2
+        or_x = or_x_in + self.l_sd_junc/2 - self.l_diff_ext/2
         sz_x = self.l_diff_ext
         origin = (or_x, or_y, or_z)
         size = (sz_x, sz_y, sz_z)
@@ -232,7 +232,7 @@ class MOSFET:
         self.device.create_contact( c_origin, c_size)     
         for n in range(self.n_gate-1):
             #sd extension
-            or_x = or_x_in + self.l_sdJunc + n*(self.l_gate_space+ self.l_chnl) +\
+            or_x = or_x_in + self.l_sd_junc + n*(self.l_gate_space+ self.l_chnl) +\
                 self.l_chnl + self.l_gate_space/2 - self.l_diff_ext/2
             origin = (or_x, or_y, or_z)
             self.device.create_diffusion(origin, size,self.MOS)
@@ -241,8 +241,8 @@ class MOSFET:
             c_origin = (c_or_x, c_or_y, c_or_z)
             self.device.create_contact( c_origin, c_size)
         #drain extension
-        or_x = or_x_in + self.l_sdJunc + (self.n_gate-1)*(self.l_gate_space+ self.l_chnl) +\
-            self.l_chnl + self.l_sdJunc/2 - self.l_diff_ext/2
+        or_x = or_x_in + self.l_sd_junc + (self.n_gate-1)*(self.l_gate_space+ self.l_chnl) +\
+            self.l_chnl + self.l_sd_junc/2 - self.l_diff_ext/2
         origin = (or_x, or_y, or_z)
         self.device.create_diffusion(origin, size,self.MOS)
         #SD contact
@@ -264,7 +264,7 @@ class MOSFET:
         c_size = (c_sz_x, c_sz_y, c_sz_z)
         #gate 
         for n in range(self.n_gate):
-            or_x = or_x_in + self.l_sdJunc + n*(self.l_gate_space+self.l_chnl)
+            or_x = or_x_in + self.l_sd_junc + n*(self.l_gate_space+self.l_chnl)
             origin = (or_x, or_y, or_z)
             self.device.create_gate(origin, gate_width=sz_y)
             #gate contact
