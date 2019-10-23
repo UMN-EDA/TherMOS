@@ -1,13 +1,19 @@
 # TherMOS: Input Directory
 
-This directory contains the model paramter files. The variables are explained in
-the figure below.
+This directory contains the model parameter files. There are a total of three
+files in this directory:
 
-The numbers in the JSON files have been obtained form publically available
-literature souces and have been cited in doc/FinFET_paramters.md and
-doc/MOSFET_paramters.md files.
+- *model_parameters_MOSFET.json*: This file stores the values of the model dimensions
+  and thermal conductivities of the various material used in planar MOS
+  technology. The numbers in this file are by default for a 14nm FDSOI technology from publically available literature sources
+  and detailed information can be found in *doc/MOSFET_parameters.md*.
 
+- *model_paramters_FinFET.json*: This file stores the values of the model dimensions
+  and thermal conductivities of the various material used in planar MOS
+  technology. The numbers in this file are by default for a 7nm FinFET technology from publically available literature sources
+  and detailed information can be found in *doc/FinFET_parameters.md*.
 
+- *tool_config.json*: This file contains parameters that are necessary for
+  TherMOS to run. See the *doc/UserGuide.md* for details on these variables.
 
-
-
+The variables in each of these files are referenced in the figure below and in *doc/* directory.
