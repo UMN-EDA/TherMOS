@@ -33,13 +33,13 @@ def main():
     FinFET_SOI_parser.add_argument("-device_type",  choices= ['NMOS','PMOS'],
                         help="Provide trasistor type", required = True)
     
-    MOSFET_Bulk_parser.add_argument("-n_gate", type=int, choices= [0,1,2,3,4,5,6,7,8,9,10],
+    MOSFET_Bulk_parser.add_argument("-n_gate", type=int, choices= [1,2,3,4,5,6,7,8,9,10],
                                     help="Provide number of gates", required = True)
-    MOSFET_SOI_parser.add_argument("-n_gate", type=int, choices= [0,1,2,3,4,5,6,7,8,9,10],
+    MOSFET_SOI_parser.add_argument("-n_gate", type=int, choices= [1,2,3,4,5,6,7,8,9,10],
                                     help="Provide number of gates", required = True)
-    FinFET_Bulk_parser.add_argument("-n_gate", type=int, choices= [0,1,2,3,4,5,6,7,8,9,10],
+    FinFET_Bulk_parser.add_argument("-n_gate", type=int, choices= [1,2,3,4,5,6,7,8,9,10],
                                     help="Provide number of gates", required = True)
-    FinFET_SOI_parser.add_argument("-n_gate", type=int, choices= [0,1,2,3,4,5,6,7,8,9,10],
+    FinFET_SOI_parser.add_argument("-n_gate", type=int, choices= [1,2,3,4,5,6,7,8,9,10],
                         help="Provide number of gates", required = True)
 
     MOSFET_Bulk_parser.add_argument("-power", type=float, 
@@ -77,9 +77,9 @@ def main():
                         help= "Provide width in nm for MOSFET", required = True)
     MOSFET_SOI_parser.add_argument("-width", type = float,  
                         help= "Provide width in nm for MOSFET", required = True)
-    FinFET_Bulk_parser.add_argument("-n_fin", type = int,  choices= [0,1,2,3,4,5,6,7,8,9,10],
+    FinFET_Bulk_parser.add_argument("-n_fin", type = int,  choices= [1,2,3,4,5,6,7,8,9,10],
                         help= "Provide number of fins", required = True)
-    FinFET_SOI_parser.add_argument("-n_fin", type = int,  choices= [0,1,2,3,4,5,6,7,8,9,10],
+    FinFET_SOI_parser.add_argument("-n_fin", type = int,  choices= [1,2,3,4,5,6,7,8,9,10],
                         help= "Provide numberof fins", required = True)
 
     args = parser.parse_args()

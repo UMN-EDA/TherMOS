@@ -1,0 +1,4 @@
+## The following are the python packages required by TherMOS
+numpy
+scipy
+pytest
