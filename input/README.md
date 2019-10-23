@@ -13,6 +13,6 @@ files in this directory:
   technology. The numbers in this file are by default for a 7nm FinFET technology from publically available literature sources
   and detailed information can be found in *doc/FinFET_parameters.md*.
 
-- *tool_config.json*: This file contains parameters that control the accuracy of TherMOS results. See the *doc/UserGuide.md* for details on these variables.
+- *tool_config.json*: This file contains parameters that directly impact the accuracy of TherMOS results. See the *doc/UserGuide.md* for details on these variables.
 
 The variables in each of these files are referenced in the figure below and in *doc/* directory.
