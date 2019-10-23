@@ -79,8 +79,7 @@ The default parameters in the file *input/model_paramter_FinFET.json* are for
 
 The usage of TherMOS is as follows:
 
-`python3 <process_type> -device_type <str> -n_gate <int>  -power <float> [-n_fin <int> | -width <float>] -active "<int_list>" -percent "<float_list>"
-
+`python3 <process_type> -device_type <str> -n_gate <int>  -power <float> [-n_fin <int> | -width <float>] -active "<int_list>" -percent "<float_list>"`
 
 | Argument              	| Comments                                                                             	|
 |-----------------------	|--------------------------------------------------------------------------------------	|
