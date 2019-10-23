@@ -32,9 +32,5 @@ comments and pointers to their source:
 
 ## References
 [1] Q. Liu et al., "High performance UTBB FDSOI devices featuring 20nm gate length for 14nm node and beyond," IEEE International Electron Devices Meeting, pp. 9.2.1-9.2.4, 2013.
-[2] Lawrence T. Clark, Vinay Vashishtha, Lucian Shifren, Aditya Gujja, Saurabh Sinha, Brian Cline, Chandarasekaran Ramamurthy, Greg Yeric,
-"ASAP7: A 7-nm finFET predictive process design kit," Microelectronics Journal, Volume 53, 2016.
-[3] Vinay Vashishtha, Manoj Vangala, Lawrence T. Clark, "ASAP7 Predictive Design
-Kit Development and Cell Design Technology Co-optimization," ICCAD Embedded
-Tutorial, 2017.
+
 
