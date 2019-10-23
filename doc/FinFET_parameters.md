@@ -8,7 +8,7 @@ This document explains the various paramteres in the
 The image on the right shows a 7nm Bulk FinFET which describes the variables
 used the JSON file.
 
-<img align = "right" width="30%" src="doc/image/Bulk_FinFET.png">
+<img align = "right" width="30%" src="image/Bulk_FinFET.png">
 
 The table below lists the various values specified in the JSON file with
 comments and pointers to their source:
