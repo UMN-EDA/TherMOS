@@ -85,12 +85,14 @@ The usage of TherMOS is as follows:
 |-----------------------	|--------------------------------------------------------------------------------------	|
 | -h, --help            	| Prints out the usage                                                                 	|
 | <process_type>        	| Process and technology specification (str, required)                                 	|
+| -device_type <str>      | NMOS or PMOS device type (required, str)                                              |
 | -n_gate <int>         	| Specifies the number of transistors in the simulation (int, required)                	|
 | -power <float>        	| Specifes the total power dissipated by the array of transistors(s)                   	|
 | -n_fin <int>          	| Number of fins in FinFET (required, int, use only when   <process_type> is FinFET)   	|
 | -width <float>        	| Width of the MOSFET (required, float, use only when process is MOSFET)               	|
-| -active    "int_list" 	| States the list of gate ids that are dissipating power (list of int,   optional)     	|
+| -active    "int_list" 	| States the list of gate ids that are dissipating power (list of int,   optional)     	| 
 | -percent "float_list" 	| Percentage of power distributed between the active gates (optional,   list_of_float) 	|
+
 
 
 After TherMOS completes execution, it generates a temperature report in the
