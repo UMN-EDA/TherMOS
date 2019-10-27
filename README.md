@@ -8,8 +8,8 @@ A thermal model for self-heating in advanced MOS devices.
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 There are two primary paths for the flow of heat in FinFETs and planar MOSFETS:
--- Down towards the substrate of the device
--- Along the channel of through the source and drain contacts into the metal
+- Down towards the substrate of the device
+- Along the channel of through the source and drain contacts into the metal
   layer stack
 
 The thermal model is based on the finite differences method (FDM),
