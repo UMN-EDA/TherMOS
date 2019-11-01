@@ -36,6 +36,9 @@ comments and pointers to their source:
 
 ## References
 [1] Lawrence T. Clark, Vinay Vashishtha, Lucian Shifren, Aditya Gujja, Saurabh Sinha, Brian Cline, Chandarasekaran Ramamurthy, Greg Yeric,"ASAP7: A 7-nm finFET predictive process design kit," Microelectronics Journal, Volume 53, 2016.
+
 [2] Vinay Vashishtha, Manoj Vangala, Lawrence T. Clark, "ASAP7 Predictive Design Kit Development and Cell Design Technology Co-optimization," ICCAD Embedded Tutorial, 2017.
+
 [3] M. Shrivastava, et al.,"Physical insight toward heat transport and an improved electrothermal modeling framework for FinFET architectures" IEEE Transactions on Electron Devices, vol. 59, no. 5, pp. 1353-1363, 2012.
+
 [4] B. Swahn and S. Hassoun, "Electro-thermal analysis of multi-fin devices," IEEE transactions on very large scale integration (VLSI) systems, vol. 16, no. 7, pp. 816-829, 2008.
