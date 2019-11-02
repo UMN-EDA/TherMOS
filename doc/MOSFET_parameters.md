@@ -12,6 +12,7 @@ used the JSON file.
 
 The table below lists the various values specified in the JSON file with
 comments and pointers to their source:
+
 | Variable      	| Value (nm) 	| Source 	| Comments                              	  |
 |---------------	|------------	|--------	|--------------------------------       	  |
 | l_chnl:       	| 20         	| [1]    	| Fig. 2                                    |
