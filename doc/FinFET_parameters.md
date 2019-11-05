@@ -43,4 +43,3 @@ comments and pointers to their source:
 
 [4] B. Swahn and S. Hassoun, "Electro-thermal analysis of multi-fin devices," IEEE transactions on very large scale integration (VLSI) systems, vol. 16, no. 7, pp. 816-829, 2008.
 
-
