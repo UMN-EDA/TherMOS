@@ -213,6 +213,10 @@ class tempSolve:
         print("Result: Max temperature rise:%e" % (max(self.T)))
         print("Result: Minimum temperature rise: %e" % (min(self.T)))
         print("Result: Average temperature rise: %e" % (np.average(self.T)))
+        with open('output/temperature.rpt','w') as file:
+            file.write("Result: Max temperature rise:%e" % (max(self.T)))
+            file.write("Result: Minimum temperature rise: %e" % (min(self.T)))
+            file.write("Result: Average temperature rise: %e" % (np.average(self.T)))
         self.T = self.T.reshape(
             (device_model.N_x, device_model.N_y, device_model.N_z), order='F')
 
