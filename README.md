@@ -75,7 +75,7 @@ obtained from literature sources as documented in [FinFET_parameters.md](doc/Fin
 
 TherMOS can be used as follows:
 
-`python3 <process_type> -device_type <str> -n_gate <int>  -power <float> [-n_fin <int> | -width <float>] -active "<int_list>" -percent "<float_list>"`
+`python3 src/TherMOS.py <process_type> -device_type <str> -n_gate <int>  -power <float> [-n_fin <int> | -width <float>] -active "<int_list>" -percent "<float_list>"`
 
 | Argument              	| Comments                                                                             	|
 |-----------------------	|--------------------------------------------------------------------------------------	|
